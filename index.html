@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHEMWAVE</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        :root {
+            --primary: #0062ff;
+            --primary-dark: #004aca;
+            --secondary: #8a2be2;
+            --dark: #121212;
+            --darker: #0a0a0a;
+            --card-dark: #1e1e1e;
+            --text: #ffffff;
+            --text-muted: #a0a0a0;
+            --success: #00c853;
+            --warning: #ffab00;
+            --danger: #ff1744;
+            --elevation-1: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --elevation-2: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 80px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 100%;
+            padding: 16px;
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: rgba(30, 30, 30, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.4rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Room Selection */
+        .room-selection {
+            display: flex;
+            gap: 12px;
+            padding: 16px 0;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .room-selection::-webkit-scrollbar {
+            display: none;
+        }
+
+        .room-btn {
+            padding: 12px 20px;
+            background: var(--card-dark);
+            border: none;
+            border-radius: 50px;
+            color: var(--text);
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--elevation-1);
+        }
+
+        .room-btn.active {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            box-shadow: 0 4px 15px rgba(0, 100, 255, 0.3);
+        }
+
+        /* Section Headers */
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin: 24px 0 16px 0;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-header i {
+            margin-right: 12px;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        /* Device Cards */
+        .devices-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .device-card {
+            background: var(--card-dark);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 180px;
+            box-shadow: var(--elevation-1);
+            transition: all 0.3s ease;
+            transform: translateY(0);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .device-card:active {
+            transform: translateY(4px);
+        }
+
+        .device-card.on {
+            box-shadow: 0 0 20px rgba(0, 200, 83, 0.3);
+        }
+
+        .device-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .device-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            background: rgba(0, 98, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .device-card.on .device-icon {
+            background: rgba(0, 200, 83, 0.2);
+            color: var(--success);
+        }
+
+        .device-status {
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .device-card.on .device-status {
+            background: rgba(0, 200, 83, 0.2);
+            color: var(--success);
+        }
+
+        .device-info {
+            margin-top: 16px;
+        }
+
+        .device-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .device-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--success);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Fan Control Sections */
+        .control-section {
+            background: var(--card-dark);
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .control-status {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .fan-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to right, #0062ff, #8a2be2);
+            outline: none;
+        }
+
+        .fan-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .speed-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: -10px;
+        }
+
+        .speed-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Login Form */
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            background: var(--card-dark);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--elevation-2);
+        }
+
+        .login-title {
+            text-align: center;
+            margin-bottom: 24px;
+            font-size: 1.8rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--text);
+            font-size: 1rem;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .error-message {
+            color: var(--danger);
+            text-align: center;
+            margin-top: 16px;
+            min-height: 20px;
+        }
+
+        /* User Info */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-name {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-around;
+            padding: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-icon {
+            font-size: 1.4rem;
+            margin-bottom: 4px;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .device-card {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .device-card:nth-child(1) { animation-delay: 0.1s; }
+        .device-card:nth-child(2) { animation-delay: 0.2s; }
+        .device-card:nth-child(3) { animation-delay: 0.3s; }
+        .device-card:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 200, 83, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 200, 83, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 200, 83, 0); }
+        }
+
+        .device-card.on .device-icon {
+            animation: pulse 2s infinite;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .devices-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .device-card {
+                min-height: 160px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                max-width: 500px;
+                margin: 0 auto;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Schedule View */
+        .schedule-view {
+            padding: 20px;
+        }
+
+        .schedule-card {
+            background: var(--card-dark);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .schedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .schedule-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .schedule-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .form-group {
+            flex: 1;
+        }
+
+        .time-input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--text);
+        }
+
+        .select-field {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--text);
+        }
+
+        /* Settings View */
+        .settings-view {
+            padding: 20px;
+        }
+
+        .settings-card {
+            background: var(--card-dark);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+
+        .settings-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: rgba(0, 98, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--primary);
+        }
+
+        .settings-content {
+            flex: 1;
+            margin-left: 16px;
+        }
+
+        .settings-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .settings-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Report View */
+        .report-view {
+            padding: 20px;
+        }
+
+        .report-card {
+            background: var(--card-dark);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .report-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .report-textarea {
+            width: 100%;
+            height: 150px;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--text);
+            resize: none;
+            margin-bottom: 20px;
+        }
+
+        .report-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Fan Steps */
+        .fan-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .fan-step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .fan-step.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .fan-step.off {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .fan-step.off.active {
+            background: var(--danger);
+        }
+
+        /* Notification Badge */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-icon-container {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login View -->
+    <div id="loginView" class="login-container">
+        <div class="login-card">
+           <div>
+            <h1>SHEMWAVE</h1>
+            <div class="subtle">Smart Home energy management</div>
+            <div class="subtle" id="userBadge" style="margin-top:6px;opacity:.8"></div>
+          </div>
+            <div class="input-group">
+                <label class="input-label">Email</label>
+                <input type="email" id="loginEmail" class="input-field" placeholder="Enter your email">
+            </div>
+            <div class="input-group">
+                <label class="input-label">Password</label>
+                <input type="password" id="loginPassword" class="input-field" placeholder="Enter your password">
+            </div>
+            <button id="loginBtn" class="btn">Login</button>
+            <button id="signupBtn" class="btn btn-secondary" style="margin-top: 10px;">Sign Up</button>
+            <div id="loginError" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- App View -->
+    <div id="appView" class="hidden">
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-home"></i>
+                </div>
+                <div class="logo-text">SHEMWAVE</div>
+            </div>
+            <div class="user-info">
+                <div class="user-name" id="userName">User</div>
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Home View -->
+        <div id="homeView" class="container">
+            <div class="room-selection">
+                <button class="room-btn active" data-room="living">Living Room</button>
+                <button class="room-btn" data-room="bed">Bed Room</button>
+                <button class="room-btn" data-room="kitchen">Kitchen</button>
+                <button class="room-btn" data-room="hall">Hall Room</button>
+                <button class="room-btn" data-room="master">Master Room</button>
+            </div>
+
+            <!-- Main Room Lights -->
+            <div class="section-header">
+                <i class="fas fa-lightbulb"></i>
+                <h3>Main Room Lights</h3>
+            </div>
+            <div class="devices-grid" id="devicesGrid">
+                <!-- Lights will be dynamically added here -->
+            </div>
+
+            <!-- Bathroom Controls -->
+            <div class="section-header">
+                <i class="fas fa-bath"></i>
+                <h3>Bathroom Controls</h3>
+            </div>
+            <div class="devices-grid" id="bathroomGrid">
+                <!-- Bathroom devices will be dynamically added here -->
+            </div>
+
+            <!-- Fan Power Control Section -->
+            <div class="control-section">
+                <div class="control-header">
+                    <div>
+                        <div class="device-name">Fan Power</div>
+                        <div class="device-desc">Turn fan on or off</div>
+                    </div>
+                    <div class="control-status"><span id="fanPowerValue">OFF</span></div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="fanPower">
+                   
+                </label>
+            </div>
+
+            <!-- Fan Speed Control Section -->
+            <div class="control-section">
+                <div class="control-header">
+                    <div>
+                        <div class="device-name">Fan Speed</div>
+                        <div class="device-desc">Adjust fan speed (1-4)</div>
+                    </div>
+                    <div class="control-status"><span id="fanSpeedValue">0</span></div>
+                </div>
+                <input type="range" min="0" max="4" value="0" class="fan-slider" id="fanSpeedSlider" step="1">
+                <div class="speed-labels">
+                    <span class="speed-label">Off</span>
+                    <span class="speed-label">1</span>
+                    <span class="speed-label">2</span>
+                    <span class="speed-label">3</span>
+                    <span class="speed-label">4</span>
+                </div>
+                <div class="fan-steps">
+                    <div class="fan-step off" data-speed="0">Off</div>
+                    <div class="fan-step" data-speed="1">1</div>
+                    <div class="fan-step" data-speed="2">2</div>
+                    <div class="fan-step" data-speed="3">3</div>
+                    <div class="fan-step" data-speed="4">4</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule View -->
+        <div id="scheduleView" class="schedule-view hidden">
+            <div class="schedule-card">
+                <div class="schedule-header">
+                    <div class="schedule-title">Add New Schedule</div>
+                </div>
+                <div class="schedule-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="input-label">Room</label>
+                            <select id="scheduleRoom" class="select-field">
+                                <option value="living">Living Room</option>
+                                <option value="bed">Bed Room</option>
+                                <option value="kitchen">Kitchen</option>
+                                <option value="hall">Hall Room</option>
+                                <option value="master">Master Room</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="input-label">Device Type</label>
+                            <select id="scheduleDeviceType" class="select-field">
+                                <option value="main">Main Room Device</option>
+                                <option value="bathroom">Bathroom Device</option>
+                                <option value="fan">Fan</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="input-label">Device</label>
+                            <select id="scheduleDevice" class="select-field">
+                                <!-- Devices will be dynamically added -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="input-label">Action</label>
+                            <select id="scheduleAction" class="select-field">
+                                <option value="on">Turn On</option>
+                                <option value="off">Turn Off</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="input-label">Time</label>
+                            <input type="time" id="scheduleTime" class="time-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="input-label">Repeat</label>
+                            <select id="scheduleRepeat" class="select-field">
+                                <option value="once">Once</option>
+                                <option value="daily">Daily</option>
+                                <option value="weekdays">Weekdays</option>
+                                <option value="weekends">Weekends</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group" id="fanSpeedGroup" style="display: none;">
+                            <label class="input-label">Fan Speed</label>
+                            <select id="scheduleFanSpeed" class="select-field">
+                                <option value="1">Speed 1</option>
+                                <option value="2">Speed 2</option>
+                                <option value="3">Speed 3</option>
+                                <option value="4">Speed 4</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="addScheduleBtn" class="btn">Add Schedule</button>
+                </div>
+            </div>
+
+            <div class="schedule-list" id="scheduleList">
+                <!-- Schedules will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- Settings View -->
+        <div id="settingsView" class="settings-view hidden">
+            <div class="settings-card">
+                <div class="settings-item">
+                    <div class="settings-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="settings-content">
+                        <div class="settings-title" id="profileName">Profile</div>
+                        <div class="settings-desc">Update your personal information</div>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="settings-content">
+                        <div class="settings-title">Notifications</div>
+                        <div class="settings-desc" id="notificationStatus">Manage your notifications</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notificationToggle" checked>
+                        <span class="slider"></span>
+						 <div class="toggle-switch">                                 
+                                </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-item" id="reportProblemBtn">
+                    <div class="settings-icon">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="settings-content">
+                        <div class="settings-title">Report a Problem</div>
+                        <div class="settings-desc">Let us know if you're experiencing issues</div>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-icon">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <div class="settings-content">
+                        <div class="settings-title">Help & Support</div>
+                        <div class="settings-desc">Get help with using the app</div>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-item" id="logoutBtn">
+                    <div class="settings-icon">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </div>
+                    <div class="settings-content">
+                        <div class="settings-title">Logout</div>
+                        <div class="settings-desc">Sign out of your account</div>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report View -->
+        <div id="reportView" class="report-view hidden">
+            <div class="report-card">
+                <div class="report-header">
+                    <div class="report-title">Report a Problem</div>
+                </div>
+                <textarea class="report-textarea" placeholder="Please describe the problem you're experiencing..." id="problemDescription"></textarea>
+                <button id="sendReportBtn" class="btn">Send Report to Support</button>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item active" data-view="homeView">
+                <div class="nav-icon"><i class="fas fa-home"></i></div>
+                <div>Home</div>
+            </div>
+            <div class="nav-item" data-view="scheduleView">
+                <div class="nav-icon-container">
+                    <div class="nav-icon"><i class="fas fa-calendar-alt"></i></div>
+                    <div class="notification-badge" id="scheduleBadge" style="display: none;">3</div>
+                </div>
+                <div>Schedule</div>
+            </div>
+            <div class="nav-item" data-view="settingsView">
+                <div class="nav-icon"><i class="fas fa-cog"></i></div>
+                <div>Settings</div>
+            </div>
+            <div class="nav-item" data-view="reportView">
+                <div class="nav-icon"><i class="fas fa-exclamation-circle"></i></div>
+                <div>Report</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAkjDnnO-8pLo6nluPc0YfqVFke-EFOxNs",
+            authDomain: "shemwave-sample.firebaseapp.com",
+            databaseURL: "https://shemwave-sample-default-rtdb.firebaseio.com",
+            projectId: "shemwave-sample",
+            storageBucket: "shemwave-sample.firebasestorage.app",
+            messagingSenderId: "538284696022",
+            appId: "1:538284696022:web:45ba3733e8a831165b0477",
+            measurementId: "G-VZBK92Y9F6"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        // DOM elements
+        const loginView = document.getElementById('loginView');
+        const appView = document.getElementById('appView');
+        const homeView = document.getElementById('homeView');
+        const scheduleView = document.getElementById('scheduleView');
+        const settingsView = document.getElementById('settingsView');
+        const reportView = document.getElementById('reportView');
+        const loginEmail = document.getElementById('loginEmail');
+        const loginPassword = document.getElementById('loginPassword');
+        const loginBtn = document.getElementById('loginBtn');
+        const signupBtn = document.getElementById('signupBtn');
+        const loginError = document.getElementById('loginError');
+        const userName = document.getElementById('userName');
+        const profileName = document.getElementById('profileName');
+        const devicesGrid = document.getElementById('devicesGrid');
+        const bathroomGrid = document.getElementById('bathroomGrid');
+        const fanSpeedSlider = document.getElementById('fanSpeedSlider');
+        const fanSpeedValue = document.getElementById('fanSpeedValue');
+        const fanPower = document.getElementById('fanPower');
+        const fanPowerValue = document.getElementById('fanPowerValue');
+        const roomButtons = document.querySelectorAll('.room-btn');
+        const navItems = document.querySelectorAll('.nav-item');
+        const scheduleRoom = document.getElementById('scheduleRoom');
+        const scheduleDeviceType = document.getElementById('scheduleDeviceType');
+        const scheduleDevice = document.getElementById('scheduleDevice');
+        const scheduleTime = document.getElementById('scheduleTime');
+        const scheduleAction = document.getElementById('scheduleAction');
+        const scheduleRepeat = document.getElementById('scheduleRepeat');
+        const scheduleFanSpeed = document.getElementById('scheduleFanSpeed');
+        const fanSpeedGroup = document.getElementById('fanSpeedGroup');
+        const addScheduleBtn = document.getElementById('addScheduleBtn');
+        const scheduleList = document.getElementById('scheduleList');
+        const problemDescription = document.getElementById('problemDescription');
+        const sendReportBtn = document.getElementById('sendReportBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const notificationToggle = document.getElementById('notificationToggle');
+        const notificationStatus = document.getElementById('notificationStatus');
+        const scheduleBadge = document.getElementById('scheduleBadge');
+        const fanSteps = document.querySelectorAll('.fan-step');
+
+        // App state
+        let currentRoom = 'living';
+        let currentUser = null;
+        let currentView = 'homeView';
+        let roomListeners = {};
+        let scheduleListeners = {};
+        let username = '';
+        let fanPowerState = false;
+        let fanSpeedState = 0;
+        let notificationsEnabled = true;
+
+        // Light data for each room
+        const roomLights = {
+            'living': [
+                { id: 'L1', name: 'Main Light', icon: 'lightbulb' },
+                { id: 'L2', name: 'Bed Lamp', icon: 'fas fa-moon' },
+                { id: 'L3', name: 'Ambient Light', icon: 'fas fa-star' },
+                { id: 'L4', name: 'Panel Light', icon: 'fas fa-bullseye' },
+                { id: 'L5', name: 'Main Socket', icon: 'fas fa-plug' },
+				{ id: 'L6', name: 'AC', icon: 'fa fa-snowflake' },
+                { id: 'L7', name: 'Socket Station 1', icon: 'fa fa-bolt' },
+				 { id: 'L8', name: 'Socket Station 2', icon: 'fa fa-bolt' }
+				  
+            ],
+            'bed': [
+                { id: 'L1', name: 'Bed Light', icon: 'lightbulb' },
+                { id: 'L2', name: 'Main Light', icon: 'lightbulb' },
+                { id: 'L3', name: 'Closet Light', icon: 'lightbulb' },
+                { id: 'L4', name: 'Reading Light', icon: 'lightbulb' },
+                { id: 'L5', name: 'Night Light', icon: 'lightbulb' },
+                { id: 'L6', name: 'Dressing Light', icon: 'lightbulb' }
+            ],
+            'kitchen': [
+                { id: 'L1', name: 'Ceiling Light', icon: 'lightbulb' },
+                { id: 'L2', name: 'Counter Light', icon: 'lightbulb' },
+                { id: 'L3', name: 'Sink Light', icon: 'lightbulb' },
+                { id: 'L4', name: 'Pantry Light', icon: 'lightbulb' },
+                { id: 'L5', name: 'Island Light', icon: 'lightbulb' },
+                { id: 'L6', name: 'Under Cabinet', icon: 'lightbulb' }
+            ],
+            'hall': [
+                { id: 'L1', name: 'Main Light', icon: 'lightbulb' },
+                { id: 'L2', name: 'Wall Light', icon: 'lightbulb' },
+                { id: 'L3', name: 'Spot Light', icon: 'lightbulb' },
+                { id: 'L4', name: 'Display Light', icon: 'lightbulb' },
+                { id: 'L5', name: 'Entrance Light', icon: 'lightbulb' },
+                { id: 'L6', name: 'Decor Light', icon: 'lightbulb' }
+            ],
+            'master': [
+                { id: 'L1', name: 'Bedside Light', icon: 'lightbulb' },
+                { id: 'L2', name: 'Main Light', icon: 'lightbulb' },
+                { id: 'L3', name: 'Dressing Light', icon: 'lightbulb' },
+                { id: 'L4', name: 'Reading Light', icon: 'lightbulb' },
+                { id: 'L5', name: 'Cabinet Light', icon: 'lightbulb' },
+                { id: 'L6', name: 'Bathroom Light', icon: 'lightbulb' }
+            ]
+        };
+
+        // Bathroom devices for each room
+        const bathroomDevices = {
+            'living': [
+                { id: 'B1', name: 'Bath Light', icon: 'lightbulb' },
+                { id: 'B2', name: 'Exhaust Fan', icon: 'fan' },
+                { id: 'B3', name: 'Heater', icon: 'temperature-high' },
+                { id: 'B4', name: 'Ventilation', icon: 'wind' }
+            ],
+            'bed': [
+                { id: 'B1', name: 'Bath Light', icon: 'lightbulb' },
+                { id: 'B2', name: 'Exhaust Fan', icon: 'fan' },
+                { id: 'B3', name: 'Heater', icon: 'temperature-high' },
+                { id: 'B4', name: 'Ventilation', icon: 'wind' }
+            ],
+          
+        
+            'master': [
+                { id: 'B1', name: 'Bath Light', icon: 'lightbulb' },
+                { id: 'B2', name: 'Exhaust Fan', icon: 'fan' },
+                { id: 'B3', name: 'Heater', icon: 'temperature-high' },
+                { id: 'B4', name: 'Ventilation', icon: 'wind' }
+            ]
+        };
+
+        // Initialize the app
+        function initApp() {
+            // Auth state observer
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    currentUser = user;
+                    username = getUsernameFromEmail(user.email);
+                    showApp();
+                    setupRoom(currentRoom);
+                    loadSchedules();
+                    checkScheduledEvents();
+                } else {
+                    showLogin();
+                }
+            });
+
+            // Login button event
+            loginBtn.addEventListener('click', e => {
+                const email = loginEmail.value;
+                const password = loginPassword.value;
+                
+                if (email && password) {
+                    loginUser(email, password);
+                } else {
+                    showError('Please enter email and password');
+                }
+            });
+
+            // Signup button event
+            signupBtn.addEventListener('click', e => {
+                const email = loginEmail.value;
+                const password = loginPassword.value;
+                
+                if (email && password) {
+                    signupUser(email, password);
+                } else {
+                    showError('Please enter email and password');
+                }
+            });
+
+            // Room selection events
+            roomButtons.forEach(button => {
+                button.addEventListener('click', e => {
+                    const room = e.target.dataset.room;
+                    if (room && room !== currentRoom) {
+                        roomButtons.forEach(btn => btn.classList.remove('active'));
+                        e.target.classList.add('active');
+                        currentRoom = room;
+                        setupRoom(room);
+                        updateScheduleDeviceDropdown();
+                    }
+                });
+            });
+
+            // Fan power toggle event
+            fanPower.addEventListener('change', e => {
+                const power = e.target.checked;
+                updateFanPower(power);
+            });
+
+            // Fan speed slider event
+            fanSpeedSlider.addEventListener('input', e => {
+                const speed = parseInt(e.target.value);
+                updateFanSpeed(speed);
+            });
+
+            // Fan step buttons event
+            fanSteps.forEach(step => {
+                step.addEventListener('click', e => {
+                    const speed = parseInt(e.target.dataset.speed);
+                    updateFanSpeed(speed);
+                });
+            });
+
+            // Navigation events
+            navItems.forEach(item => {
+                if (!item.id) {
+                    item.addEventListener('click', e => {
+                        const view = e.currentTarget.dataset.view;
+                        if (view && view !== currentView) {
+                            navItems.forEach(nav => {
+                                if (!nav.id) nav.classList.remove('active');
+                            });
+                            e.currentTarget.classList.add('active');
+                            showView(view);
+                        }
+                    });
+                }
+            });
+
+            // Schedule room change event
+            scheduleRoom.addEventListener('change', e => {
+                updateScheduleDeviceDropdown();
+            });
+
+            // Schedule device type change event
+            scheduleDeviceType.addEventListener('change', e => {
+                updateScheduleDeviceDropdown();
+            });
+
+            // Add schedule event
+            addScheduleBtn.addEventListener('click', e => {
+                addSchedule();
+            });
+
+            // Report problem event
+            document.getElementById('reportProblemBtn').addEventListener('click', e => {
+                showView('reportView');
+            });
+
+            // Send report event
+            sendReportBtn.addEventListener('click', e => {
+                sendReport();
+            });
+
+            // Notification toggle event
+            notificationToggle.addEventListener('change', e => {
+                notificationsEnabled = e.target.checked;
+                notificationStatus.textContent = notificationsEnabled ? 
+                    'Notifications enabled' : 'Notifications disabled';
+                
+                if (currentUser && username) {
+                    const notificationRef = database.ref(`${username}/settings/notifications`);
+                    notificationRef.set(notificationsEnabled);
+                }
+            });
+
+            // Logout event
+            logoutBtn.addEventListener('click', e => {
+                logoutUser();
+            });
+        }
+
+        // Get username from email
+        function getUsernameFromEmail(email) {
+            return email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '_');
+        }
+
+        // Show error message
+        function showError(message) {
+            loginError.textContent = message;
+            setTimeout(() => {
+                loginError.textContent = '';
+            }, 3000);
+        }
+
+        // Login user with email and password
+        function loginUser(email, password) {
+            auth.signInWithEmailAndPassword(email, password)
+                .catch(error => {
+                    showError(error.message);
+                });
+        }
+
+        // Sign up new user
+        function signupUser(email, password) {
+            auth.createUserWithEmailAndPassword(email, password)
+                .then(() => {
+                    username = getUsernameFromEmail(email);
+                    // Initialize user data in database
+                    const userRef = database.ref(`${username}`);
+                    
+                    // Create initial data structure for all rooms
+                    const initialData = {};
+                    
+                    // Initialize each room with lights, bathroom devices, and fan
+                    Object.keys(roomLights).forEach(room => {
+                        initialData[room] = {};
+                        
+                        // Add main room lights
+                        roomLights[room].forEach(light => {
+                            initialData[room][light.id] = false;
+                        });
+                        
+                        // Add bathroom devices
+                        bathroomDevices[room].forEach(device => {
+                            initialData[room][device.id] = false;
+                        });
+                        
+                        // Add fan
+                        initialData[room]['fan'] = { power: false, speed: 0 };
+                    });
+                    
+                    // Add settings
+                    initialData['settings'] = { notifications: true };
+                    
+                    userRef.set(initialData);
+                })
+                .catch(error => {
+                    showError(error.message);
+                });
+        }
+
+        // Logout user
+        function logoutUser() {
+            auth.signOut()
+                .catch(error => {
+                    showError(error.message);
+                });
+        }
+
+        // Show app view
+        function showApp() {
+            loginView.classList.add('hidden');
+            appView.classList.remove('hidden');
+            userName.textContent = currentUser.email.split('@')[0];
+            profileName.textContent = currentUser.email.split('@')[0];
+            
+            // Load notification settings
+            if (currentUser && username) {
+                const notificationRef = database.ref(`${username}/settings/notifications`);
+                notificationRef.on('value', snapshot => {
+                    const enabled = snapshot.val();
+                    notificationsEnabled = enabled !== null ? enabled : true;
+                    notificationToggle.checked = notificationsEnabled;
+                    notificationStatus.textContent = notificationsEnabled ? 
+                        'Notifications enabled' : 'Notifications disabled';
+                });
+            }
+        }
+
+        // Show login view
+        function showLogin() {
+            appView.classList.add('hidden');
+            loginView.classList.remove('hidden');
+            currentUser = null;
+            username = '';
+        }
+
+        // Show specific view
+        function showView(view) {
+            // Hide all views
+            homeView.classList.add('hidden');
+            scheduleView.classList.add('hidden');
+            settingsView.classList.add('hidden');
+            reportView.classList.add('hidden');
+            
+            // Show the selected view
+            document.getElementById(view).classList.remove('hidden');
+            currentView = view;
+            
+            // If schedule view, update device dropdown
+            if (view === 'scheduleView') {
+                updateScheduleDeviceDropdown();
+            }
+        }
+
+        // Update schedule device dropdown
+        function updateScheduleDeviceDropdown() {
+            const room = scheduleRoom.value;
+            const deviceType = scheduleDeviceType.value;
+            
+            // Clear existing options
+            scheduleDevice.innerHTML = '';
+            
+            if (deviceType === 'main') {
+                // Add lights for selected room
+                roomLights[room].forEach(light => {
+                    const option = document.createElement('option');
+                    option.value = light.id;
+                    option.textContent = light.name;
+                    scheduleDevice.appendChild(option);
+                });
+                fanSpeedGroup.style.display = 'none';
+            } else if (deviceType === 'bathroom') {
+                // Add bathroom devices for selected room
+                bathroomDevices[room].forEach(device => {
+                    const option = document.createElement('option');
+                    option.value = device.id;
+                    option.textContent = device.name;
+                    scheduleDevice.appendChild(option);
+                });
+				
+                fanSpeedGroup.style.display = 'none';
+            } else if (deviceType === 'fan') {
+                // Add fan option
+                const fanOption = document.createElement('option');
+                fanOption.value = 'fan';
+                fanOption.textContent = 'Ceiling Fan';
+                scheduleDevice.appendChild(fanOption);
+                fanSpeedGroup.style.display = 'block';
+            }
+        }
+
+        // Set up room with lights, bathroom devices, and fan
+        function setupRoom(room) {
+            // Clear previous devices
+            devicesGrid.innerHTML = '';
+            bathroomGrid.innerHTML = '';
+            
+            // Remove previous room listeners
+            if (roomListeners[room]) {
+                roomListeners[room].forEach(listener => listener());
+                roomListeners[room] = [];
+            } else {
+                roomListeners[room] = [];
+            }
+            
+            // Add lights for the current room
+            roomLights[room].forEach(light => {
+                const lightCard = createDeviceCard(room, light.id, light.name, light.icon);
+                devicesGrid.appendChild(lightCard);
+                
+                // Set up real-time listener for this light
+                if (currentUser && username) {
+                    setupDeviceListener(room, light.id, lightCard);
+                }
+            });
+            
+            // Add bathroom devices for the current room
+            bathroomDevices[room].forEach(device => {
+                const deviceCard = createDeviceCard(room, device.id, device.name, device.icon);
+                bathroomGrid.appendChild(deviceCard);
+                
+                // Set up real-time listener for this device
+                if (currentUser && username) {
+                    setupDeviceListener(room, device.id, deviceCard);
+                }
+            });
+            
+            // Set up fan power and speed listeners
+            if (currentUser && username) {
+                const fanPowerRef = database.ref(`${username}/${room}/power`);
+                const fanPowerListener = fanPowerRef.on('value', snapshot => {
+                    const power = snapshot.val() || false;
+                    fanPowerState = power;
+                    fanPower.checked = power;
+                    updateFanUI();
+                });
+                
+                const fanSpeedRef = database.ref(`${username}/${room}/speed`);
+                const fanSpeedListener = fanSpeedRef.on('value', snapshot => {
+                    const speed = snapshot.val() || 0;
+                    fanSpeedState = speed;
+                    updateFanUI();
+                });
+                
+                roomListeners[room].push(() => fanPowerRef.off('value', fanPowerListener));
+                roomListeners[room].push(() => fanSpeedRef.off('value', fanSpeedListener));
+            }
+        }
+
+        // Create a device card
+        function createDeviceCard(room, deviceId, deviceName, icon) {
+            const deviceCard = document.createElement('div');
+            deviceCard.className = 'device-card';
+            deviceCard.id = `${room}-${deviceId}`;
+            deviceCard.innerHTML = `
+                <div class="device-header">
+                    <div class="device-icon">
+                        <i class="fas fa-${icon}"></i>
+                    </div>
+                    <div class="device-status">OFF</div>
+                </div>
+                <div class="device-info">
+                    <div class="device-name">${deviceName}</div>
+                    <div class="device-desc">Tap to toggle</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox">
+                    <span class="slider"></span>
+                </label>
+            `;
+            
+            // Add click event to toggle device
+            deviceCard.addEventListener('click', () => {
+                toggleDevice(room, deviceId);
+            });
+            
+            return deviceCard;
+        }
+
+        // Set up device listener
+        function setupDeviceListener(room, deviceId, deviceCard) {
+            const deviceRef = database.ref(`${username}/${room}/${deviceId}`);
+            const listener = deviceRef.on('value', snapshot => {
+                const isOn = snapshot.val();
+                deviceCard.classList.toggle('on', isOn);
+                deviceCard.querySelector('.device-status').textContent = isOn ? 'ON' : 'OFF';
+                deviceCard.querySelector('input[type="checkbox"]').checked = isOn;
+            });
+            
+            roomListeners[room].push(() => deviceRef.off('value', listener));
+        }
+
+        // Update fan UI
+        function updateFanUI() {
+            fanSpeedSlider.value = fanSpeedState;
+            fanSpeedValue.textContent = fanSpeedState === 0 ? '0' : fanSpeedState;
+            fanPowerValue.textContent = fanPowerState ? 'ON' : 'OFF';
+            
+            // Update fan steps
+            fanSteps.forEach(step => {
+                const stepSpeed = parseInt(step.dataset.speed);
+                step.classList.remove('active');
+                if (stepSpeed === fanSpeedState) {
+                    step.classList.add('active');
+                }
+            });
+            
+            // Enable/disable slider based on power state
+            fanSpeedSlider.disabled = !fanPowerState;
+            fanSteps.forEach(step => {
+                if (step.dataset.speed !== "0") {
+                    step.style.opacity = fanPowerState ? "1" : "0.5";
+                    step.style.cursor = fanPowerState ? "pointer" : "not-allowed";
+                }
+            });
+        }
+
+        // Update fan power
+        function updateFanPower(power) {
+            if (currentUser && username) {
+                const fanPowerRef = database.ref(`${username}/${currentRoom}/power`);
+                fanPowerRef.set(power);
+                
+                // If turning on and speed is 0, set to default speed 1
+                if (power && fanSpeedState === 0) {
+                    const fanSpeedRef = database.ref(`${username}/${currentRoom}/speed`);
+                    fanSpeedRef.set(1);
+                } else if (!power) {
+                    // If turning off, set speed to 0
+                    const fanSpeedRef = database.ref(`${username}/${currentRoom}/speed`);
+                    fanSpeedRef.set(0);
+                }
+            }
+        }
+
+        // Update fan speed
+        function updateFanSpeed(speed) {
+            if (currentUser && username) {
+                const fanSpeedRef = database.ref(`${username}/${currentRoom}/speed`);
+                fanSpeedRef.set(speed);
+                
+                // If setting speed > 0, ensure power is on
+                if (speed > 0 && !fanPowerState) {
+                    const fanPowerRef = database.ref(`${username}/${currentRoom}/power`);
+                    fanPowerRef.set(true);
+                } else if (speed === 0 && fanPowerState) {
+                    // If setting speed to 0, turn power off
+                    const fanPowerRef = database.ref(`${username}/${currentRoom}/power`);
+                    fanPowerRef.set(false);
+                }
+            }
+        }
+
+        // Toggle device state
+        function toggleDevice(room, deviceId) {
+            if (currentUser && username) {
+                const deviceRef = database.ref(`${username}/${room}/${deviceId}`);
+                deviceRef.transaction(current => {
+                    return current === true ? false : true;
+                });
+            }
+        }
+
+        // Add a new schedule
+        function addSchedule() {
+            const room = scheduleRoom.value;
+            const deviceType = scheduleDeviceType.value;
+            const device = scheduleDevice.value;
+            const time = scheduleTime.value;
+            const action = scheduleAction.value;
+            const repeat = scheduleRepeat.value;
+            const fanSpeed = deviceType === 'fan' ? scheduleFanSpeed.value : null;
+            
+            if (!device || !time) {
+                alert('Please select a device and time');
+                return;
+            }
+            
+            if (currentUser && username) {
+                const scheduleId = Date.now().toString();
+                const scheduleRef = database.ref(`${username}/schedules/${scheduleId}`);
+                
+                scheduleRef.set({
+                    room: room,
+                    deviceType: deviceType,
+                    device: device,
+                    time: time,
+                    action: action,
+                    repeat: repeat,
+                    fanSpeed: fanSpeed,
+                    enabled: true
+                }).then(() => {
+                    // Reset form
+                    scheduleTime.value = '';
+                    scheduleAction.value = 'on';
+                    scheduleRepeat.value = 'once';
+                    scheduleFanSpeed.value = '1';
+                    fanSpeedGroup.style.display = 'none';
+                    
+                    alert('Schedule added successfully');
+                }).catch(error => {
+                    alert('Error adding schedule: ' + error.message);
+                });
+            }
+        }
+
+        // Load schedules
+        function loadSchedules() {
+            if (currentUser && username) {
+                // Clear existing schedules
+                scheduleList.innerHTML = '';
+                
+                // Remove previous schedule listeners
+                if (scheduleListeners.schedules) {
+                    scheduleListeners.schedules();
+                }
+                
+                const schedulesRef = database.ref(`${username}/schedules`);
+                scheduleListeners.schedules = schedulesRef.on('value', snapshot => {
+                    scheduleList.innerHTML = '';
+                    let scheduleCount = 0;
+                    
+                    snapshot.forEach(childSnapshot => {
+                        const schedule = childSnapshot.val();
+                        const scheduleId = childSnapshot.key;
+                        scheduleCount++;
+                        
+                        const scheduleItem = document.createElement('div');
+                        scheduleItem.className = 'schedule-item';
+                        
+                        let deviceName = schedule.device;
+                        if (schedule.deviceType === 'main') {
+                            deviceName = getDeviceName(schedule.device, schedule.room, 'main');
+                        } else if (schedule.deviceType === 'bathroom') {
+                            deviceName = getDeviceName(schedule.device, schedule.room, 'bathroom');
+                        } else if (schedule.deviceType === 'fan') {
+                            deviceName = 'Ceiling Fan';
+                        }
+                        
+                        scheduleItem.innerHTML = `
+                            <div class="schedule-info">
+                                <div class="schedule-time">${schedule.time} - ${schedule.repeat}</div>
+                                <div class="schedule-action">${deviceName} - ${schedule.action === 'on' ? 'Turn On' : 'Turn Off'}${schedule.fanSpeed ? ' (Speed ' + schedule.fanSpeed + ')' : ''}</div>
+                            </div>
+                            <div class="schedule-delete" data-id="${scheduleId}">
+                                <i class="fas fa-trash"></i>
+                            </div>
+                        `;
+                        
+                        scheduleList.appendChild(scheduleItem);
+                        
+                        // Add delete event
+                        scheduleItem.querySelector('.schedule-delete').addEventListener('click', e => {
+                            e.stopPropagation();
+                            deleteSchedule(scheduleId);
+                        });
+                    });
+                    
+                    // Update schedule badge
+                    if (scheduleCount > 0) {
+                        scheduleBadge.style.display = 'flex';
+                        scheduleBadge.textContent = scheduleCount;
+                    } else {
+                        scheduleBadge.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        // Check for scheduled events
+        function checkScheduledEvents() {
+            if (currentUser && username) {
+                const schedulesRef = database.ref(`${username}/schedules`);
+                schedulesRef.on('value', snapshot => {
+                    const now = new Date();
+                    const currentTime = now.toTimeString().substring(0, 5);
+                    const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+                    
+                    snapshot.forEach(childSnapshot => {
+                        const schedule = childSnapshot.val();
+                        if (schedule.enabled && schedule.time === currentTime) {
+                            // Check if schedule should run today
+                            let shouldRun = false;
+                            
+                            if (schedule.repeat === 'daily') {
+                                shouldRun = true;
+                            } else if (schedule.repeat === 'weekdays' && currentDay >= 1 && currentDay <= 5) {
+                                shouldRun = true;
+                            } else if (schedule.repeat === 'weekends' && (currentDay === 0 || currentDay === 6)) {
+                                shouldRun = true;
+                            } else if (schedule.repeat === 'once') {
+                                shouldRun = true;
+                                // Disable one-time schedules after they run
+                                schedulesRef.child(childSnapshot.key).update({ enabled: false });
+                            }
+                            
+                            if (shouldRun) {
+                                executeSchedule(schedule);
+                                
+                                // Show notification if enabled
+                                if (notificationsEnabled) {
+                                    let deviceName = schedule.device;
+                                    if (schedule.deviceType === 'main') {
+                                        deviceName = getDeviceName(schedule.device, schedule.room, 'main');
+                                    } else if (schedule.deviceType === 'bathroom') {
+                                        deviceName = getDeviceName(schedule.device, schedule.room, 'bathroom');
+                                    } else if (schedule.deviceType === 'fan') {
+                                        deviceName = 'Ceiling Fan';
+                                    }
+                                    
+                                    showNotification(`Schedule executed: ${deviceName} turned ${schedule.action} in ${schedule.room.replace('-', ' ')}`);
+                                }
+                            }
+                        }
+                    });
+                });
+            }
+            
+            // Check every minute
+            setTimeout(checkScheduledEvents, 60000);
+        }
+
+        // Execute a schedule
+        function executeSchedule(schedule) {
+            if (schedule.deviceType === 'fan') {
+                // Handle fan schedule
+                if (schedule.action === 'on') {
+                    const fanPowerRef = database.ref(`${username}/${schedule.room}/fan/power`);
+                    fanPowerRef.set(true);
+                    
+                    if (schedule.fanSpeed) {
+                        const fanSpeedRef = database.ref(`${username}/${schedule.room}/fan/speed`);
+                        fanSpeedRef.set(parseInt(schedule.fanSpeed));
+                    }
+                } else {
+                    const fanPowerRef = database.ref(`${username}/${schedule.room}/fan/power`);
+                    fanPowerRef.set(false);
+                }
+            } else {
+                // Handle light or bathroom device schedule
+                const deviceRef = database.ref(`${username}/${schedule.room}/${schedule.device}`);
+                deviceRef.set(schedule.action === 'on');
+            }
+        }
+
+        // Show notification
+        function showNotification(message) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('HomeHub Schedule', { body: message });
+            } else if ('Notification' in window && Notification.permission !== 'denied') {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        new Notification('HomeHub Schedule', { body: message });
+                    }
+                });
+            }
+            
+            // Also show in-app notification
+            if (notificationsEnabled) {
+                alert(`Notification: ${message}`);
+            }
+        }
+
+        // Get device name
+        function getDeviceName(deviceId, room, type) {
+            if (type === 'main') {
+                const device = roomLights[room].find(light => light.id === deviceId);
+                return device ? device.name : deviceId;
+            } else if (type === 'bathroom') {
+                const device = bathroomDevices[room].find(dev => dev.id === deviceId);
+                return device ? device.name : deviceId;
+            }
+            return deviceId;
+        }
+
+        // Delete schedule
+        function deleteSchedule(scheduleId) {
+            if (currentUser && username && confirm('Are you sure you want to delete this schedule?')) {
+                const scheduleRef = database.ref(`${username}/schedules/${scheduleId}`);
+                scheduleRef.remove()
+                    .catch(error => {
+                        alert('Error deleting schedule: ' + error.message);
+                    });
+            }
+        }
+
+        // Send problem report
+        function sendReport() {
+            const description = problemDescription.value.trim();
+            
+            if (!description) {
+                alert('Please describe the problem');
+                return;
+            }
+            
+            // Send report via email
+            const mailtoLink = `mailto:shemwave@gmail.com?subject=Problem Report&body=${encodeURIComponent(description)}`;
+            window.location.href = mailtoLink;
+            
+            // Reset and go back to home view
+            problemDescription.value = '';
+            navItems.forEach(nav => nav.classList.remove('active'));
+            document.querySelector('[data-view="homeView"]').classList.add('active');
+            showView('homeView');
+            
+            alert('Thank you for your report. We will get back to you soon.');
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+        
+        // Request notification permission on load
+        if ('Notification' in window) {
+            Notification.requestPermission();
+        }
+    </script>
+</body>
+</html>
